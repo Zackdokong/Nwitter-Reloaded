@@ -50,6 +50,7 @@ const GlobalStyles = createGlobalStyle`
     background-color: black;
     color: white;
     font-family: system-ui;
+    overflow: hidden;
   }
 `;
 
