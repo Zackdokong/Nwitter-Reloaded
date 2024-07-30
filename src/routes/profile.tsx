@@ -48,6 +48,37 @@ const Name = styled.span`
   font-size: 22px;
 `;
 
+const EditButton = styled.button`
+  background-color: #1d9bf0;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+`;
+
+const NameForm = styled.form`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+`;
+
+const NameInput = styled.input`
+  font-size: 22px;
+  padding: 5px;
+  text-align: center;
+`;
+
+const SaveButton = styled.button`
+  background-color: #1d9bf0;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+`;
+
 const Tweets = styled.div`
   display: flex;
   width: 100%;
@@ -59,6 +90,8 @@ export default function Profile() {
   const user = auth.currentUser;
   const [avatar, setAvatar] = useState(user?.photoURL);
   const [tweets, setTweets] = useState<ITweet[]>([]);
+  const [displayName, setDisplayName] = useState(user?.displayName ?? "Anonymous");
+  const [editingName, setEditingName] = useState(false); // 이름 변경 모드 상태
 
   const onAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
@@ -72,6 +105,18 @@ export default function Profile() {
       await updateProfile(user, {
         photoURL: avatarUrl,
       });
+    }
+  };
+
+  const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDisplayName(e.target.value);
+  };
+
+  const onSaveName = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (user && displayName) {
+      await updateProfile(user, { displayName });
+      setEditingName(false); // 이름 변경 모드를 종료
     }
   };
 
@@ -124,7 +169,21 @@ export default function Profile() {
         type="file"
         accept="image/*"
       />
-      <Name>{user?.displayName ?? "Anonymous"}</Name>
+      {editingName ? (
+        <NameForm onSubmit={onSaveName}>
+          <NameInput
+            value={displayName}
+            onChange={onNameChange}
+            placeholder="Enter new username"
+          />
+          <SaveButton type="submit">Save</SaveButton>
+        </NameForm>
+      ) : (
+        <>
+          <Name>{displayName}</Name>
+          <EditButton onClick={() => setEditingName(true)}>Edit Name</EditButton>
+        </>
+      )}
       <Tweets>
         {tweets.map((tweet) => (
           <Tweet key={tweet.id} {...tweet} />
